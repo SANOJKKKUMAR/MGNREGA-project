@@ -55,6 +55,10 @@ app.get('/district/:name', async (req, res) => {
     }
 });
 
+app.get('/', (req, res) => {
+    res.send('Welcome to the District Data API');
+});
+
 app.listen(5000, () => app.listen(PORT, () => console.log(`Server running on port ${PORT}`)));
 
 
