@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MGNREGA District Performance</title>
+<style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
+    h1 { text-align: center; }
+    #districtSelect { padding: 10px; font-size: 16px; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+    th { background: #4CAF50; color: white; }
+</style>
+</head>
+<body>
+<h1>MGNREGA District Performance</h1>
+
+<select id="districtSelect">
+    <option value="">Select District</option>
+    <option value="Patna">Patna</option>
+    <option value="Gaya">Gaya</option>
+    <option value="Bhagalpur">Bhagalpur</option>
+</select>
+
+<table id="dataTable">
+    <thead>
+        <tr>
+            <th>Month</th>
+            <th>Works Completed</th>
+            <th>Payments (in Rs)</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+const select = document.getElementById('districtSelect');
+const tableBody = document.querySelector('#dataTable tbody');
+
+select.addEventListener('change', async () => {
+    const district = select.value;
+    if (!district) return;
+    
+    tableBody.innerHTML = '<tr><td colspan="3">Loading...</td></tr>';
+
+    try {
+        const res = await fetch(`http://localhost:5000/district/${district}`);
+        const data = await res.json();
+        tableBody.innerHTML = '';
+
+        data.forEach(item => {
+            const row = `<tr>
+                <td>${item.month}</td>
+                <td>${item.works_completed}</td>
+                <td>${item.payments}</td>
+            </tr>`;
+            tableBody.innerHTML += row;
+        });
+    } catch (err) {
+        tableBody.innerHTML = '<tr><td colspan="3">Error fetching data</td></tr>';
+    }
+});
+</script>
+</body>
+</html>
