@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const csv = require('csv-parser');
+const path = require('path');
 const { DistrictData, sequelize } = require('./models/DistrictData');
 
 const app = express();
@@ -9,7 +10,8 @@ app.use(cors());
 app.use(express.json());
 const PORT = process.env.PORT || 5000;
 
-
+// Serve static frontend files from 'public' folder
+app.use(express.static(path.join(__dirname, 'public')));
 
 // CSV file path
 const CSV_FILE_PATH = './data.csv';
@@ -23,7 +25,6 @@ async function importCSV() {
         .on('end', async () => {
             try {
                 for (let row of results) {
-                    // Adjust keys according to your CSV column names
                     await DistrictData.create({
                         district: row['District'] || row['district_name'],
                         month: row['Month'] || row['month'],
@@ -55,11 +56,87 @@ app.get('/district/:name', async (req, res) => {
     }
 });
 
+// Serve frontend index.html at root
 app.get('/', (req, res) => {
-    res.send('Welcome to the District Data API');
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(5000, () => app.listen(PORT, () => console.log(`Server running on port ${PORT}`)));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+
+
+
+
+
+
+
+
+
+
+
+// const express = require('express');
+// const cors = require('cors');
+// const fs = require('fs');
+// const csv = require('csv-parser');
+// const { DistrictData, sequelize } = require('./models/DistrictData');
+
+// const app = express();
+// app.use(cors());
+// app.use(express.json());
+// const PORT = process.env.PORT || 5000;
+
+
+
+// // CSV file path
+// const CSV_FILE_PATH = './data.csv';
+
+// // Function to import CSV to DB
+// async function importCSV() {
+//     const results = [];
+//     fs.createReadStream(CSV_FILE_PATH)
+//         .pipe(csv())
+//         .on('data', (data) => results.push(data))
+//         .on('end', async () => {
+//             try {
+//                 for (let row of results) {
+//                     // Adjust keys according to your CSV column names
+//                     await DistrictData.create({
+//                         district: row['District'] || row['district_name'],
+//                         month: row['Month'] || row['month'],
+//                         works_completed: parseInt(row['Works Completed'] || 0),
+//                         payments: parseFloat(row['Payments'] || 0)
+//                     });
+//                 }
+//                 console.log('CSV data imported successfully!');
+//             } catch (err) {
+//                 console.error('Error importing CSV:', err);
+//             }
+//         });
+// }
+
+// // Sync DB and import CSV once at start
+// sequelize.sync().then(() => {
+//     console.log('Database synced.');
+//     importCSV();
+// });
+
+// // API to fetch district-wise data
+// app.get('/district/:name', async (req, res) => {
+//     const districtName = req.params.name;
+//     try {
+//         const data = await DistrictData.findAll({ where: { district: districtName } });
+//         res.json(data);
+//     } catch (err) {
+//         res.status(500).json({ error: 'Server error' });
+//     }
+// });
+
+// app.get('/', (req, res) => {
+//     res.send('Welcome to the District Data API');
+// });
+
+
+// app.listen(5000, () => app.listen(PORT, () => console.log(`Server running on port ${PORT}`)));
 
 
 
