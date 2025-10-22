@@ -45,7 +45,7 @@ select.addEventListener('change', async () => {
     tableBody.innerHTML = '<tr><td colspan="3">Loading...</td></tr>';
 
     try {
-        const res = await fetch(`http://localhost:5000/district/${district}`);
+        const res = await fetch(`https://mgnrega-project-5.onrender.com/district/${district}`);
         const data = await res.json();
         tableBody.innerHTML = '';
 
