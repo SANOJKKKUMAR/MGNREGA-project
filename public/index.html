@@ -1,66 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MGNREGA District Performance</title>
-<style>
-    body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
-    h1 { text-align: center; }
-    #districtSelect { padding: 10px; font-size: 16px; margin-bottom: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
-    th { background: #4CAF50; color: white; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MGNREGA District Data</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #56ab2f, #a8e063);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 20px;
+      color: #333;
+    }
+
+    h1 {
+      color: #fff;
+      margin-bottom: 20px;
+      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 15px;
+      padding: 25px 30px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+      animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    input[type="text"] {
+      width: 80%;
+      padding: 10px;
+      font-size: 16px;
+      border: 2px solid #4caf50;
+      border-radius: 8px;
+      outline: none;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    input[type="text"]:focus {
+      border-color: #388e3c;
+    }
+
+    button {
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #output {
+      margin-top: 20px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+
+    th {
+      background-color: #4caf50;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    p {
+      font-size: 16px;
+      font-weight: 500;
+    }
+  </style>
 </head>
+
 <body>
-<h1>MGNREGA District Performance</h1>
+  <h1>MGNREGA District Data</h1>
 
-<select id="districtSelect">
-    <option value="">Select District</option>
-    <option value="Patna">Patna</option>
-    <option value="Gaya">Gaya</option>
-    <option value="Bhagalpur">Bhagalpur</option>
-</select>
+  <div class="card">
+    <input type="text" id="districtInput" placeholder="Enter District Name (e.g., Patna)" />
+    <br />
+    <button onclick="fetchDistrictData()">Get Data</button>
 
-<table id="dataTable">
-    <thead>
-        <tr>
-            <th>Month</th>
-            <th>Works Completed</th>
-            <th>Payments (in Rs)</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+    <div id="output"></div>
+  </div>
 
-<script>
-const select = document.getElementById('districtSelect');
-const tableBody = document.querySelector('#dataTable tbody');
+  <script>
+    async function fetchDistrictData() {
+      const district = document.getElementById("districtInput").value.trim();
 
-select.addEventListener('change', async () => {
-    const district = select.value;
-    if (!district) return;
-    
-    tableBody.innerHTML = '<tr><td colspan="3">Loading...</td></tr>';
+      if (!district) {
+        alert("Please enter a district name!");
+        return;
+      }
 
-    try {
+      try {
         const res = await fetch(`https://mgnrega-project-5.onrender.com/district/${district}`);
         const data = await res.json();
-        tableBody.innerHTML = '';
 
-        data.forEach(item => {
-            const row = `<tr>
-                <td>${item.month}</td>
-                <td>${item.works_completed}</td>
-                <td>${item.payments}</td>
-            </tr>`;
-            tableBody.innerHTML += row;
+        console.log("Fetched data:", data);
+
+        const output = document.getElementById("output");
+        output.innerHTML = "";
+
+        if (data.length === 0) {
+          output.innerHTML = `<p>No data found for ${district.toUpperCase()}</p>`;
+          return;
+        }
+
+        let table = `
+          <table>
+            <tr>
+              <th>District</th>
+              <th>Month</th>
+              <th>Works Completed</th>
+              <th>Payments (₹)</th>
+            </tr>
+        `;
+
+        data.forEach((row) => {
+          table += `
+            <tr>
+              <td>${row.district}</td>
+              <td>${row.month}</td>
+              <td>${row.works_completed}</td>
+              <td>${row.payments}</td>
+            </tr>
+          `;
         });
-    } catch (err) {
-        tableBody.innerHTML = '<tr><td colspan="3">Error fetching data</td></tr>';
+
+        table += `</table>`;
+        output.innerHTML = table;
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        document.getElementById("output").innerHTML = `<p style="color:red;">Error loading data!</p>`;
+      }
     }
-});
-</script>
+
+    // Auto-uppercase input while typing
+    const input = document.getElementById("districtInput");
+    input.addEventListener("input", (e) => {
+      e.target.value = e.target.value.toUpperCase();
+    });
+  </script>
 </body>
 </html>
